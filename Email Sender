@@ -11,7 +11,7 @@ txtfilepath='body.txt'
 xlsxfilepath = 'table.xlsx'
 
 
-#this performs spintax and replaces [name] with customer name from ecel
+#this performs spintax and replaces [name] with customer name from excel
 def SpinTextAndReplaceName(file,customer_name):
     txtfile = open(file)
     txtfile = spintax.spin(txtfile.read().replace('[name]',customer_name))
