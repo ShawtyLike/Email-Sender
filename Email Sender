@@ -1,0 +1,112 @@
+
+import spintax
+import openpyxl
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import email
+import smtplib,ssl
+from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
+txtfilepath='body.txt'
+xlsxfilepath = 'table.xlsx'
+
+
+#this performs spintax and replaces [name] with customer name from ecel
+def SpinTextAndReplaceName(file,customer_name):
+    txtfile = open(file)
+    txtfile = spintax.spin(txtfile.read().replace('[name]',customer_name))
+    return txtfile
+
+
+
+
+
+
+def SendEmail(pathToSubject,pathToBody,senderEmail,recieverEmail,recieverName,smtpservice,proxyNumber,proxyAddress,senderPassword):
+    body = SpinTextAndReplaceName(pathToBody,recieverName)
+    pdf = "body.pdf"
+    subject = SpinTextAndReplaceName(pathToSubject,recieverName)
+    message = MIMEMultipart()
+    message["From"] = senderEmail
+    message["To"] = recieverEmail
+    message["Subject"] = subject
+    message["Bcc"] = recieverEmail
+    message.attach(MIMEText(body,'html'))
+    message.attach('body,pdf')
+    # message.attach(MIMEText(body, "plain"))
+
+
+
+    message = str(message)
+    if 'gmail' in str(smtpservice):
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+            server.ehlo()
+            server.starttls(context=ssl.create_default_context())
+            server.ehlo()
+            server.login(senderEmail, senderPassword)
+            server.sendmail(senderEmail, recieverEmail, message)
+            server.quit()
+            print('sent')
+
+    elif 'office365' or 'outlook'in str(smtpservice):
+        with smtplib.SMTP('smtp.office365.com', 587) as server:
+            server.ehlo()
+            server.starttls(context=ssl.create_default_context())
+            server.ehlo()
+            server.login(senderEmail, senderPassword)
+            server.sendmail(senderEmail, recieverEmail, message)
+            server.quit()
+            print('sent')
+    elif 'yahoo' in str(smtpservice):
+        with smtplib.SMTP('smtp.mail.yahoo.com', 465) as server:
+            server.ehlo()
+            server.starttls(context=ssl.create_default_context())
+            server.ehlo()
+            server.login(senderEmail, senderPassword)
+            server.sendmail(senderEmail, recieverEmail, message)
+            server.quit()
+            print('sent')
+    elif 'aol' in str(smtpservice):
+        with smtplib.SMTP('smtp.aol.com', 465) as server:
+            server.ehlo()
+            server.starttls(context=ssl.create_default_context())
+            server.ehlo()
+            server.login(senderEmail, senderPassword)
+            server.sendmail(senderEmail, recieverEmail, message)
+            server.quit()
+            print('sent')
+
+    elif 'hotmail' in str(smtpservice):
+        with smtplib.SMTP('smtp.live.com', 465) as server:
+            server.ehlo()
+            server.starttls(context=ssl.create_default_context())
+            server.ehlo()
+            server.login(senderEmail, senderPassword)
+            server.sendmail(senderEmail, recieverEmail, message)
+            server.quit()
+            print('sent')
+def LoadWorkbook(filepath):
+    wb = openpyxl.load_workbook(filepath)
+    return wb
+
+
+i = 1
+while True:
+    row_list=[]
+    for value in LoadWorkbook(xlsxfilepath).worksheets[0].iter_cols(1,):
+        row_list.append(value[i].value)
+    print(row_list)
+    senderEmail = row_list[0]
+    senderPassword = row_list[1]
+    recieverEmail = row_list[2]
+    recieverName = row_list[3]
+    proxyToUse = row_list[4]
+    proxyAddress = row_list[5]
+    smtpserverr = row_list[6]
+    SendEmail(senderEmail = senderEmail, senderPassword = senderPassword, proxyAddress=proxyAddress,proxyNumber=proxyToUse,pathToBody='body.txt',pathToSubject='subject.txt',smtpservice=smtpserverr,recieverEmail=recieverEmail,recieverName=recieverName)
+    i+=1
+
+
+
+
+
